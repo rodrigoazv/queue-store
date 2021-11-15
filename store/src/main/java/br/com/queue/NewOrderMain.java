@@ -14,13 +14,17 @@ public class NewOrderMain {
         var value = "123123,123123,1023";
         var record = new ProducerRecord<>("STORE_NEW_ORDER", value, value);
 
-        producer.send(record, (data, ex) -> {
-            if( ex != null){
-                ex.printStackTrace();
-                return;
-            }
-            System.out.println(data.topic() + ":::partition" + data.partition());
-        }).get();
+        while(true){
+            producer.send(record, (data, ex) -> {
+                if( ex != null){
+                    ex.printStackTrace();
+
+                }
+                System.out.println(data.topic() + ":::partition" + data.partition());
+            }).get();
+        }
+
+
     }
 
     private static Properties properties() {
