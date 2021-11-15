@@ -1,5 +1,6 @@
 package br.com.queue;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -12,20 +13,26 @@ public class NewOrderMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         var producer = new KafkaProducer<String, String>(properties());
         var value = "123123,123123,1023";
+        var email = "Welcome !";
+
         var record = new ProducerRecord<>("STORE_NEW_ORDER", value, value);
-
-        while(true){
-            producer.send(record, (data, ex) -> {
-                if( ex != null){
-                    ex.printStackTrace();
-
-                }
-                System.out.println(data.topic() + ":::partition" + data.partition());
-            }).get();
+        var emailRecord = new ProducerRecord<>("STORE_SEND_EMAIL", email, email);
+        while (true){
+            producer.send(record, getCallback()).get();
+            producer.send(emailRecord, getCallback()).get();
         }
 
-
     }
+
+    private static Callback getCallback() {
+        return (data, ex) -> {
+            if( ex != null){
+                ex.printStackTrace();
+            }
+            System.out.println(data.topic() + ":::partition" + data.partition());
+        };
+    }
+
 
     private static Properties properties() {
         var properties = new Properties();
